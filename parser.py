@@ -1,7 +1,9 @@
-import progressbar
 from html.parser import HTMLParser
 import json
 import os
+import datetime
+import time
+import string
 
 class BaseMessageParser(HTMLParser):
     def __init__(self):
@@ -60,6 +62,8 @@ class BaseMessageParser(HTMLParser):
             self.handle_sender(data)
         elif self.state == 3:
             # Timestamp
+            if data[0] not in string.ascii_uppercase:
+                return
             self.handle_timestamp(data)
         else:
             # Message
@@ -82,25 +86,26 @@ class BaseMessageParser(HTMLParser):
         self.users = users
 
 class JSONSaver(BaseMessageParser):
-    def __init__(self, filename, user):
+    def __init__(self, user):
         super().__init__()
         self.user = user
         self.threads = []
-        self.filename = filename
-        self.bar = progressbar.ProgressBar(max_vale=progressbar.UnknownLength)
+        self.filename = 'json/'
 
     def handle_thread_name(self, name):
         #  print('thread')
         self.threads.append({
                 'users': [],
-                'messages': []
+                'messages': [{}]
             }
         )
         self.threads[-1]['name'] = name
+        self.filename += name.replace(' ', '_').lower().replace('/', '_') + '.json'
 
     def handle_timestamp(self, timestamp):
         #  print('time')
-        self.threads[-1]['messages'][-1]['timestamp'] = timestamp
+        timestamp = datetime.datetime.strptime(timestamp + "00", "%A, %B %d, %Y at %H:%M%p UTC%z") 
+        self.threads[-1]['messages'][-1]['timestamp'] = time.mktime(timestamp.timetuple())
 
     def handle_message(self, message):
         #  print('message')
@@ -108,7 +113,8 @@ class JSONSaver(BaseMessageParser):
 
     def handle_sender(self, sender):
         #  print('sender')
-        self.threads[-1]['messages'].append({})
+        if not self.threads[-1]['messages'][0] == {}:
+            self.threads[-1]['messages'].append({})
         self.threads[-1]['messages'][-1]['user'] = sender
 
     def handle_users(self, users):

@@ -1,6 +1,14 @@
 from parser import JSONSaver
+import progressbar
+import os
 
+messages = os.listdir('messages')
+bar = progressbar.ProgressBar(max_value=len(messages))
 print("Saving...")
-parser = JSONSaver('travis.json', 'Luke Tuthill')
-parser.feed(open("messages/591.html").read())
-parser.close()
+i = 0
+for filename in messages:
+    parser = JSONSaver('Luke Tuthill')
+    parser.feed(open("messages/" + filename).read())
+    parser.close()
+    bar.update(i)
+    i += 1
