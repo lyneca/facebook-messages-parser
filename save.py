@@ -7,7 +7,7 @@ bar = progressbar.ProgressBar(max_value=len(messages))
 print("Saving...")
 i = 0
 for filename in messages:
-    parser = JSONSaver('Luke Tuthill')
+    parser = JSONSaver('YOUR NAME HERE')
     parser.feed(open("messages/" + filename).read())
     parser.close()
     bar.update(i)
